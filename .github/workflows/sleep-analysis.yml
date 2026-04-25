@@ -25,6 +25,7 @@ jobs:
       OPENAI_DISABLE_RESPONSE_STORAGE: ${{ vars.OPENAI_DISABLE_RESPONSE_STORAGE || 'true' }}
       OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'xhigh' }}
       HEALTH_REPORT_KEY: ${{ secrets.HEALTH_REPORT_KEY }}
+      USER_PERSONA: ${{ secrets.USER_PERSONA }}
 
     steps:
       - name: Check out repository

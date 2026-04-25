@@ -43,7 +43,6 @@ final class GitHubClient {
             sleepWindowEnd: payload.windowEnd,
             generatedAt: payload.generatedAt,
             source: payload.source,
-            persona: AppConfig.userPersona,
             sleepSamples: payload.samples,
             quantityMetrics: [],
             standHours: [],

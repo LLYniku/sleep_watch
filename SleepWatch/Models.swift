@@ -8,7 +8,6 @@ struct HealthPayload: Codable {
     let sleepWindowEnd: String
     let generatedAt: String
     let source: String
-    let persona: String
     let sleepSamples: [SleepStageSample]
     let quantityMetrics: [HealthQuantityMetric]
     let standHours: [StandHourSample]
@@ -22,7 +21,6 @@ struct HealthPayload: Codable {
         case sleepWindowEnd = "sleep_window_end"
         case generatedAt = "generated_at"
         case source
-        case persona
         case sleepSamples = "sleep_samples"
         case quantityMetrics = "quantity_metrics"
         case standHours = "stand_hours"

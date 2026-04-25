@@ -68,7 +68,6 @@ final class HealthKitSleepStore {
             sleepWindowEnd: isoFormatter.string(from: sleepWindowEnd),
             generatedAt: isoFormatter.string(from: Date()),
             source: "apple_watch_healthkit",
-            persona: AppConfig.userPersona,
             sleepSamples: sleep,
             quantityMetrics: metrics,
             standHours: try await standHours,

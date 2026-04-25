@@ -15,7 +15,7 @@ Each user should run their own repository, secrets, token, encryption key, bundl
 - Keeps raw HealthKit payloads and plaintext reports out of the repository.
 - Schedules a local 09:00 watchOS background refresh when the system allows it.
 - Sends a local Apple Watch notification after a report is generated and decrypted.
-- Supports a configurable `userPersona` so advice can match the user's lifestyle, work, study, and recovery needs.
+- Supports a private `USER_PERSONA` GitHub Secret so advice can match the user's lifestyle, work, study, and recovery needs without exposing that profile in the repository.
 
 ## Who This Is For
 
@@ -29,6 +29,7 @@ Each user should run their own repository, secrets, token, encryption key, bundl
 - Use a separate GitHub repository per user. Do not share one repository across multiple people.
 - The Watch app uploads raw HealthKit data to GitHub Actions over HTTPS so the workflow can analyze it.
 - GitHub Actions and the configured model provider can process the raw payload during a run.
+- Personal prompt/profile text is not sent from the Watch app. Store it only as the `USER_PERSONA` GitHub Actions secret.
 - The repository should only commit encrypted reports: `reports/*.json.enc`.
 - Raw payloads, Markdown summaries, and plaintext JSON reports are ignored and should not be committed.
 - Never commit `OPENAI_API_KEY`, the Watch GitHub token, or `HEALTH_REPORT_KEY`.
@@ -41,6 +42,7 @@ Each user should run their own repository, secrets, token, encryption key, bundl
 2. In repository settings, add Actions secrets:
    - `OPENAI_API_KEY`: an OpenAI-compatible API key.
    - `HEALTH_REPORT_KEY`: a base64-encoded 32-byte AES key. The Watch app must use the same value in `SleepWatch/Config.swift`.
+   - `USER_PERSONA`: private personalization text used by the analysis prompt. Do not put this in `Config.swift` or the repository.
 3. Add repository variables:
    - `OPENAI_API_BASE=https://api.openai.com/v1` or another OpenAI-compatible endpoint.
    - `OPENAI_MODEL=gpt-5.4-mini` or another model supported by your endpoint.
@@ -56,7 +58,6 @@ Each user should run their own repository, secrets, token, encryption key, bundl
    - `githubBranch`
    - `githubToken`
    - `reportEncryptionKey`
-   - `userPersona`
 
 You can store the Watch token and generate a local report encryption key with:
 
@@ -68,13 +69,13 @@ Then set the printed/generated encryption key as the repository secret `HEALTH_R
 
 ## Personalization
 
-Edit `userPersona` in `SleepWatch/Config.swift` before building the app. Keep it concise and practical. Examples:
+Set `USER_PERSONA` as a GitHub Actions secret. Keep it concise and practical. Examples:
 
 - `Night-shift worker who wants sleep recovery advice and gentle reminders.`
 - `Desk-based software developer who wants posture, movement, and stress-management suggestions.`
 - `Student preparing for exams who prefers encouraging language and realistic rest advice.`
 
-The workflow uses this field only to guide the analysis tone and recommendations. It should not contain secrets.
+The workflow uses this secret only to guide the analysis tone and recommendations. It is not committed, not sent by the Watch app, and should not be printed in workflow logs.
 
 ## Xcode Setup
 
@@ -119,7 +120,6 @@ Run the GitHub Action manually with a payload like:
   "sleep_window_end": "2099-01-01T12:00:00Z",
   "generated_at": "2099-01-01T09:00:00Z",
   "source": "manual_test",
-  "persona": "久坐办公或学习人群；希望获得温和、具体、可执行的健康建议。",
   "sleep_samples": [
     {
       "stage": "asleep_core",

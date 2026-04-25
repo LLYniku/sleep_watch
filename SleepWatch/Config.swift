@@ -14,6 +14,4 @@ enum AppConfig {
 
     static let morningHour = 9
     static let morningMinute = 0
-
-    static let userPersona = "久坐办公或学习人群；希望获得温和、具体、可执行的健康建议。"
 }
