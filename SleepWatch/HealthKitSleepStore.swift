@@ -46,18 +46,19 @@ final class HealthKitSleepStore {
         let sleepWindowStart = calendar.date(byAdding: .hour, value: 18, to: previousDay) ?? previousDay
         let sleepWindowEnd = calendar.date(byAdding: .hour, value: 12, to: dayStart) ?? referenceDate
 
-        async let sleepSamples = fetchSleepSamples(start: sleepWindowStart, end: sleepWindowEnd)
-        async let quantityMetrics = fetchQuantityMetrics(start: windowStart, end: windowEnd)
-        async let standHours = fetchStandHours(start: windowStart, end: windowEnd)
-
-        let metrics = try await quantityMetrics
+        let metrics = await fetchQuantityMetrics(start: windowStart, end: windowEnd)
         var gaps = metrics
             .filter { $0.sampleCount == 0 }
             .map { "\($0.title) has no samples in the analysis window." }
 
-        let sleep = try await sleepSamples
+        let sleep = await fetchSleepSamples(start: sleepWindowStart, end: sleepWindowEnd)
         if sleep.isEmpty {
             gaps.append("Sleep Analysis has no samples in the previous-night window.")
+        }
+
+        let standHours = await fetchStandHours(start: windowStart, end: windowEnd)
+        if standHours.isEmpty {
+            gaps.append("Apple Stand Hour has no samples in the analysis window.")
         }
 
         return HealthPayload(
@@ -70,7 +71,7 @@ final class HealthKitSleepStore {
             source: "apple_watch_healthkit",
             sleepSamples: sleep,
             quantityMetrics: metrics,
-            standHours: try await standHours,
+            standHours: standHours,
             dataGaps: gaps
         )
     }
@@ -87,14 +88,19 @@ final class HealthKitSleepStore {
         )
     }
 
-    private func fetchSleepSamples(start: Date, end: Date) async throws -> [SleepStageSample] {
+    private func fetchSleepSamples(start: Date, end: Date) async -> [SleepStageSample] {
         guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
-            throw SleepWatchError.sleepTypeUnavailable
+            return []
         }
 
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
         let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
-        let samples: [HKCategorySample] = try await fetchSamples(type: sleepType, predicate: predicate, sort: [sort])
+        let samples: [HKCategorySample]
+        do {
+            samples = try await fetchSamples(type: sleepType, predicate: predicate, sort: [sort])
+        } catch {
+            return []
+        }
 
         return samples.map { sample in
             SleepStageSample(
@@ -107,7 +113,7 @@ final class HealthKitSleepStore {
         }
     }
 
-    private func fetchQuantityMetrics(start: Date, end: Date) async throws -> [HealthQuantityMetric] {
+    private func fetchQuantityMetrics(start: Date, end: Date) async -> [HealthQuantityMetric] {
         var results: [HealthQuantityMetric] = []
         for spec in Self.metricSpecs {
             guard let type = HKObjectType.quantityType(forIdentifier: spec.identifier) else {
@@ -115,8 +121,21 @@ final class HealthKitSleepStore {
             }
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
             let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
-            let samples: [HKQuantitySample] = try await fetchSamples(type: type, predicate: predicate, sort: [sort])
-            let statistics = try await fetchStatistics(type: type, predicate: predicate, options: spec.statisticsOptions)
+            let samples: [HKQuantitySample]
+            do {
+                samples = try await fetchSamples(type: type, predicate: predicate, sort: [sort])
+            } catch {
+                samples = []
+            }
+
+            let statistics: HKStatistics
+            do {
+                statistics = try await fetchStatistics(type: type, predicate: predicate, options: spec.statisticsOptions)
+            } catch {
+                results.append(Self.emptyMetric(for: spec, samples: samples, formatter: isoFormatter))
+                continue
+            }
+
             var value: Double?
             var average: Double?
             var minimum: Double?
@@ -141,21 +160,7 @@ final class HealthKitSleepStore {
                 maximum = nil
             }
 
-            results.append(
-                HealthQuantityMetric(
-                    id: spec.id,
-                    title: spec.title,
-                    unit: spec.unitLabel,
-                    aggregation: spec.aggregation,
-                    value: value,
-                    average: average,
-                    minimum: minimum,
-                    maximum: maximum,
-                    sampleCount: samples.count,
-                    start: samples.first.map { isoFormatter.string(from: $0.startDate) },
-                    end: samples.last.map { isoFormatter.string(from: $0.endDate) }
-                )
-            )
+            results.append(Self.metric(for: spec, samples: samples, value: value, average: average, minimum: minimum, maximum: maximum, formatter: isoFormatter))
         }
         return results
     }
@@ -181,13 +186,18 @@ final class HealthKitSleepStore {
         }
     }
 
-    private func fetchStandHours(start: Date, end: Date) async throws -> [StandHourSample] {
+    private func fetchStandHours(start: Date, end: Date) async -> [StandHourSample] {
         guard let type = HKObjectType.categoryType(forIdentifier: .appleStandHour) else {
             return []
         }
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
         let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
-        let samples: [HKCategorySample] = try await fetchSamples(type: type, predicate: predicate, sort: [sort])
+        let samples: [HKCategorySample]
+        do {
+            samples = try await fetchSamples(type: type, predicate: predicate, sort: [sort])
+        } catch {
+            return []
+        }
 
         return samples.map { sample in
             StandHourSample(
@@ -196,6 +206,34 @@ final class HealthKitSleepStore {
                 stood: sample.value == HKCategoryValueAppleStandHour.stood.rawValue
             )
         }
+    }
+
+    private static func emptyMetric(for spec: MetricSpec, samples: [HKQuantitySample], formatter: ISO8601DateFormatter) -> HealthQuantityMetric {
+        metric(for: spec, samples: samples, value: nil, average: nil, minimum: nil, maximum: nil, formatter: formatter)
+    }
+
+    private static func metric(
+        for spec: MetricSpec,
+        samples: [HKQuantitySample],
+        value: Double?,
+        average: Double?,
+        minimum: Double?,
+        maximum: Double?,
+        formatter: ISO8601DateFormatter
+    ) -> HealthQuantityMetric {
+        HealthQuantityMetric(
+            id: spec.id,
+            title: spec.title,
+            unit: spec.unitLabel,
+            aggregation: spec.aggregation,
+            value: value,
+            average: average,
+            minimum: minimum,
+            maximum: maximum,
+            sampleCount: samples.count,
+            start: samples.first.map { formatter.string(from: $0.startDate) },
+            end: samples.last.map { formatter.string(from: $0.endDate) }
+        )
     }
 
     private func fetchSamples<T: HKSample>(type: HKSampleType, predicate: NSPredicate, sort: [NSSortDescriptor]) async throws -> [T] {
