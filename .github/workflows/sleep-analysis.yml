@@ -1,0 +1,54 @@
+name: Sleep Analysis
+
+on:
+  repository_dispatch:
+    types: [sleep_data]
+  workflow_dispatch:
+    inputs:
+      payload_json:
+        description: "Raw SleepPayload JSON for manual testing"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || vars.OPENAI_BASE_URL || 'https://api.openai.com/v1' }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || vars.MODEL_NAME || 'gpt-5.4-mini' }}
+      MODEL_NAME: ${{ vars.MODEL_NAME || vars.OPENAI_MODEL || 'gpt-5.4-mini' }}
+      OPENAI_WIRE_API: ${{ vars.OPENAI_WIRE_API || 'responses' }}
+      OPENAI_DISABLE_RESPONSE_STORAGE: ${{ vars.OPENAI_DISABLE_RESPONSE_STORAGE || 'true' }}
+      OPENAI_REASONING_EFFORT: ${{ vars.OPENAI_REASONING_EFFORT || 'xhigh' }}
+      HEALTH_REPORT_KEY: ${{ secrets.HEALTH_REPORT_KEY }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Python dependencies
+        run: python3 -m pip install openai cryptography
+
+      - name: Analyze health payload
+        run: python3 scripts/analyze_sleep.py --event "$GITHUB_EVENT_PATH" --out-dir summaries --data-dir data --report-dir reports
+
+      - name: Commit generated health files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/*.json.enc
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+            exit 0
+          fi
+          git commit -m "Add sleep analysis for $(date -u +%F)"
+          git push
