@@ -102,7 +102,7 @@ struct StandHourSample: Codable, Hashable {
     }
 }
 
-struct HealthReport: Decodable {
+struct HealthReport: Codable {
     let reportDate: String
     let overall: ReportOverall
     let sections: [ReportSection]
@@ -116,14 +116,14 @@ struct HealthReport: Decodable {
     }
 }
 
-struct ReportOverall: Decodable {
+struct ReportOverall: Codable {
     let score: Int
     let title: String
     let assessment: String
     let recommendation: String
 }
 
-struct ReportSection: Decodable, Identifiable {
+struct ReportSection: Codable, Identifiable {
     let id: String
     let title: String
     let status: String
@@ -133,7 +133,7 @@ struct ReportSection: Decodable, Identifiable {
     let metrics: [ReportMetric]
 }
 
-struct ReportMetric: Decodable, Identifiable {
+struct ReportMetric: Codable, Identifiable {
     let id = UUID()
     let label: String
     let value: String

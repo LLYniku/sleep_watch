@@ -24,7 +24,9 @@ final class SleepAnalysisManager {
         let payload = try await sleepStore.fetchDailyHealth()
         try await github.dispatchHealthPayload(payload)
 
-        return try await waitForReport(reportDate: payload.analysisDate)
+        let report = try await waitForReport(reportDate: payload.analysisDate)
+        LastReportStore.save(report)
+        return report
     }
 
     func uploadDailyHealthAndNotifyReport() async throws -> HealthReport {
@@ -40,7 +42,13 @@ final class SleepAnalysisManager {
 
     func fetchLatestReport() async throws -> HealthReport {
         let payload = try await sleepStore.fetchDailyHealth()
-        return try await github.fetchReport(reportDate: payload.analysisDate)
+        let report = try await github.fetchReport(reportDate: payload.analysisDate)
+        LastReportStore.save(report)
+        return report
+    }
+
+    func cachedReport() -> HealthReport? {
+        LastReportStore.load()
     }
 
     func uploadPreviousNightAndNotify() async throws -> String {
@@ -157,5 +165,23 @@ final class SleepAnalysisManager {
             return "\(headline)\n\(recommendation)"
         }
         return "\(headline)\n\(recommendation)\n\(keySections)"
+    }
+}
+
+private enum LastReportStore {
+    private static let key = "last_health_report_v1"
+
+    static func load() -> HealthReport? {
+        guard let data = UserDefaults.standard.data(forKey: key) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(HealthReport.self, from: data)
+    }
+
+    static func save(_ report: HealthReport) {
+        guard let data = try? JSONEncoder().encode(report) else {
+            return
+        }
+        UserDefaults.standard.set(data, forKey: key)
     }
 }

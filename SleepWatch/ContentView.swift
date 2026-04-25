@@ -16,7 +16,7 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         MetricRow(label: "计划", value: "每天 09:00")
                         MetricRow(label: "模式", value: "健康报告")
-                        MetricRow(label: "本地保存", value: "关闭")
+                        MetricRow(label: "本地保存", value: viewModel.cachedReportStatus)
                     }
                     .padding(10)
                     .background(Color.secondary.opacity(0.12))
@@ -201,15 +201,26 @@ final class SleepViewModel: ObservableObject {
     @Published var notificationPreview = ""
     @Published var report: HealthReport?
     @Published var isWorking = false
+    @Published var cachedReportStatus = "上一份报告"
 
     private let manager = SleepAnalysisManager()
 
     func prepare() async {
+        if let cached = manager.cachedReport() {
+            report = cached
+            notificationPreview = "\(cached.overall.title)：\(cached.overall.recommendation)"
+            cachedReportStatus = cached.reportDate
+            title = "已载入上次报告"
+            message = "这份报告会一直保留，直到下一次分析或刷新成功后覆盖。"
+        }
+
         do {
             try await manager.authorize()
             manager.scheduleNextMorningRefresh()
-            title = "已准备"
-            message = "每天 09:00 会尝试生成个人健康报告。"
+            if report == nil {
+                title = "已准备"
+                message = "每天 09:00 会尝试生成个人健康报告。"
+            }
         } catch {
             title = "授权失败"
             message = error.localizedDescription
@@ -224,15 +235,15 @@ final class SleepViewModel: ObservableObject {
 
         do {
             report = try await manager.uploadDailyHealthAndNotifyReport()
-            notificationPreview = "\(report?.overall.title ?? "健康报告已生成")：\(report?.overall.recommendation ?? "")"
+            updateCachedReportStatus()
             title = "报告已生成"
             message = "已完成总体评价和分项建议，并已通过通知弹出。"
         } catch SleepWatchError.summaryNotReady {
             title = "数据已上传"
-            message = "Action 还没写入报告，稍后可点刷新报告。"
+            message = report == nil ? "Action 还没写入报告，稍后可点刷新报告。" : "Action 还没写入新报告，当前仍显示上一次报告。"
         } catch {
             title = "分析失败"
-            message = error.localizedDescription
+            message = report == nil ? error.localizedDescription : "\(error.localizedDescription) 当前仍显示上一次报告。"
         }
     }
 
@@ -244,16 +255,26 @@ final class SleepViewModel: ObservableObject {
 
         do {
             report = try await manager.fetchLatestReport()
-            notificationPreview = "\(report?.overall.title ?? "健康报告已生成")：\(report?.overall.recommendation ?? "")"
+            updateCachedReportStatus()
             title = "报告已更新"
             message = "已载入最新 AI 健康评价。"
         } catch SleepWatchError.summaryNotReady {
             title = "暂无报告"
-            message = "GitHub 还没有生成今天的健康报告。"
+            message = report == nil ? "GitHub 还没有生成今天的健康报告。" : "GitHub 还没有生成今天的新报告，当前仍显示上一次报告。"
         } catch {
             title = "刷新失败"
-            message = error.localizedDescription
+            message = report == nil ? error.localizedDescription : "\(error.localizedDescription) 当前仍显示上一次报告。"
         }
+    }
+
+    private func updateCachedReportStatus() {
+        guard let report else {
+            cachedReportStatus = "上一份报告"
+            notificationPreview = ""
+            return
+        }
+        cachedReportStatus = report.reportDate
+        notificationPreview = "\(report.overall.title)：\(report.overall.recommendation)"
     }
 }
 

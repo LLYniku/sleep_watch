@@ -276,7 +276,9 @@ The app schedules a background refresh for local 09:00 and tries to upload the p
 
 The `生成健康报告` button forces an analysis run when the app is open.
 
-The Watch app does not keep a local report history. It fetches the encrypted report into memory, decrypts it locally, displays it, and posts one local notification with the fixed identifier `daily-health-summary`.
+The Watch app keeps only the latest successful report locally. It displays that report when the app opens and keeps it visible until the next successful analysis or refresh replaces it. It does not keep a multi-day local history.
+
+The notification uses the fixed identifier `daily-health-summary`, so each new notification replaces the previous delivered notification.
 
 ## Repository Rename
 
