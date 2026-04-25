@@ -67,6 +67,8 @@ Then complete the GitHub, local config, and Xcode setup below.
 
 Create your own repository from this project by forking it, using it as a template, or pushing a copy to a new repository.
 
+If this project helps you, please consider starring the original repository so more Apple Watch users can find it.
+
 Recommended: keep the repository private unless you understand the privacy tradeoffs. The app can work with a public repository because reports are encrypted, but private is still safer for personal health workflows.
 
 ## GitHub Actions Secrets
