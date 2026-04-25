@@ -1,19 +1,22 @@
 # Apple Watch AI Health Coach
 
-A native watchOS app that reads Apple Watch / HealthKit data, sends it to GitHub Actions, analyzes it with an OpenAI-compatible model, stores only an encrypted report in the repository, and shows a short notification on Apple Watch.
+Welcome to fork this project and add a star if it helps you!
 
-This project is a self-hosted personal health report pipeline. Every user must configure their own GitHub repository, GitHub Actions secrets, OpenAI-compatible API key, encryption key, Apple Developer signing, and Apple Watch app settings.
+Apple Watch AI Health Coach is a native watchOS app that turns Apple Watch / HealthKit data into a personalized daily health report. It combines sleep, activity, heart rate, HRV, respiratory, oxygen saturation, stand, distance, energy, and other available Watch health signals, then sends the data to GitHub Actions for encrypted, self-hosted AI analysis.
 
-No personal data, API keys, GitHub tokens, HealthKit exports, or user-specific prompt text are included in this repository.
+The key idea is personalization. After you provide your own background through a private GitHub Secret, such as your work environment, study or work pressure, lifestyle, sleep habits, exercise goals, and preferred coaching tone, the workflow calls OpenAI or any OpenAI-compatible API to generate a report tailored specifically for you. The report is not a generic health summary; it is a customized interpretation of your own Watch data and your own life context.
+
+This project is self-hosted. Every user configures their own GitHub repository, GitHub Actions secrets, OpenAI-compatible API key, encryption key, Apple Developer signing, and Apple Watch app settings. No personal data, API keys, GitHub tokens, HealthKit exports, or user-specific prompt text are included in this repository.
 
 ## Features
 
-- Reads HealthKit sleep, activity, heart rate, HRV, respiratory rate, oxygen saturation, stand hours, distance, flights climbed, exercise time, and active energy.
+- Reads comprehensive Apple Watch / HealthKit signals, including sleep, activity, heart rate, HRV, respiratory rate, oxygen saturation, stand hours, distance, flights climbed, exercise time, and active energy.
 - Triggers a GitHub Actions workflow from Apple Watch.
-- Uses an OpenAI-compatible API to generate a structured Chinese health report.
+- Uses OpenAI or any OpenAI-compatible API to generate a structured Chinese health report.
+- Uses a private `USER_PERSONA` GitHub Secret to personalize the report around your work environment, lifestyle, stress level, exercise habits, recovery needs, and preferred tone.
+- Produces a report that is designed for you, not a one-size-fits-all template.
 - Stores only AES-256-GCM encrypted reports in `reports/*.json.enc`.
 - Does not commit raw HealthKit payloads, plaintext JSON reports, or Markdown summaries.
-- Uses a private `USER_PERSONA` GitHub Secret for personalization.
 - Sends a local Apple Watch notification after the encrypted report is fetched and decrypted.
 - Schedules a local 09:00 watchOS background refresh when watchOS allows it.
 
