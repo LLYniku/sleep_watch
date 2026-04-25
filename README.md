@@ -6,6 +6,8 @@ Apple Watch AI Health Coach is a native watchOS app that turns Apple Watch / Hea
 
 The key idea is personalization. After you provide your own background through a private GitHub Secret, such as your work environment, study or work pressure, lifestyle, sleep habits, exercise goals, and preferred coaching tone, the workflow calls OpenAI or any OpenAI-compatible API to generate a report tailored specifically for you. The report is not a generic health summary; it is a customized interpretation of your own Watch data and your own life context.
 
+You can also extend it in your own direction. With Codex or your preferred coding workflow, this project can be customized to add new notification options, new report sections, new health modules, different prompts, custom scoring rules, extra UI views, or summaries that combine Apple Watch data with other apps and personal data sources.
+
 This project is self-hosted. Every user configures their own GitHub repository, GitHub Actions secrets, OpenAI-compatible API key, encryption key, Apple Developer signing, and Apple Watch app settings. No personal data, API keys, GitHub tokens, HealthKit exports, or user-specific prompt text are included in this repository.
 
 ## Features
