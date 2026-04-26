@@ -10,6 +10,18 @@ You can also extend it in your own direction. With Codex or your preferred codin
 
 This project is self-hosted. Every user configures their own GitHub repository, GitHub Actions secrets, OpenAI-compatible API key, encryption key, Apple Developer signing, and Apple Watch app settings. No personal data, API keys, GitHub tokens, HealthKit exports, or user-specific prompt text are included in this repository.
 
+## Watch App Screenshots
+
+| Analysis flow | Cached report | Notification preview | Overall score |
+| --- | --- | --- | --- |
+| <img src="docs/images/watch-analyzing.jpg" width="180" alt="Apple Watch analysis in progress screen"> | <img src="docs/images/watch-cached-report.jpg" width="180" alt="Apple Watch cached latest report screen"> | <img src="docs/images/watch-notification-preview.jpg" width="180" alt="Apple Watch notification preview screen"> | <img src="docs/images/watch-overall-score.jpg" width="180" alt="Apple Watch overall score screen"> |
+| Reads health data, uploads it to GitHub Actions, and waits for the AI report. | Keeps the latest successful report on the Watch until the next successful refresh. | Shows the report summary that will be used for the local Watch notification. | Presents the personalized overall health score, assessment, and top recommendation. |
+
+| Daily reminder | Sleep recovery | Activity and sitting | Focus plan |
+| --- | --- | --- | --- |
+| <img src="docs/images/watch-daily-reminder.jpg" width="180" alt="Apple Watch daily reminder section"> | <img src="docs/images/watch-sleep-section.jpg" width="180" alt="Apple Watch sleep recovery section"> | <img src="docs/images/watch-activity-section.jpg" width="180" alt="Apple Watch activity and sitting section"> | <img src="docs/images/watch-focus-plan.jpg" width="180" alt="Apple Watch focus plan section"> |
+| Gives a personal morning reminder based on the user's context and recent data. | Summarizes sleep duration, REM, awake time, and recovery recommendations. | Reviews steps, standing time, stairs, and sedentary-work recovery suggestions. | Turns the report into a practical workday plan with rest, movement, and focus guidance. |
+
 ## Features
 
 - Reads comprehensive Apple Watch / HealthKit signals, including sleep, activity, heart rate, HRV, respiratory rate, oxygen saturation, stand hours, distance, flights climbed, exercise time, and active energy.
