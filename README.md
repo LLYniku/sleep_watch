@@ -12,15 +12,52 @@ This project is self-hosted. Every user configures their own GitHub repository, 
 
 ## Watch App Screenshots
 
-| Analysis flow | Cached report | Notification preview | Overall score |
-| --- | --- | --- | --- |
-| <img src="docs/images/watch-analyzing.jpg" width="180" alt="Apple Watch analysis in progress screen"> | <img src="docs/images/watch-cached-report.jpg" width="180" alt="Apple Watch cached latest report screen"> | <img src="docs/images/watch-notification-preview.jpg" width="180" alt="Apple Watch notification preview screen"> | <img src="docs/images/watch-overall-score.jpg" width="180" alt="Apple Watch overall score screen"> |
-| Reads health data, uploads it to GitHub Actions, and waits for the AI report. | Keeps the latest successful report on the Watch until the next successful refresh. | Shows the report summary that will be used for the local Watch notification. | Presents the personalized overall health score, assessment, and top recommendation. |
-
-| Daily reminder | Sleep recovery | Activity and sitting | Focus plan |
-| --- | --- | --- | --- |
-| <img src="docs/images/watch-daily-reminder.jpg" width="180" alt="Apple Watch daily reminder section"> | <img src="docs/images/watch-sleep-section.jpg" width="180" alt="Apple Watch sleep recovery section"> | <img src="docs/images/watch-activity-section.jpg" width="180" alt="Apple Watch activity and sitting section"> | <img src="docs/images/watch-focus-plan.jpg" width="180" alt="Apple Watch focus plan section"> |
-| Gives a personal morning reminder based on the user's context and recent data. | Summarizes sleep duration, REM, awake time, and recovery recommendations. | Reviews steps, standing time, stairs, and sedentary-work recovery suggestions. | Turns the report into a practical workday plan with rest, movement, and focus guidance. |
+<table>
+  <tr>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-analyzing.jpg" width="150" alt="Apple Watch analysis in progress screen"><br>
+      <strong>Analysis flow</strong><br>
+      <sub>Reads health data, uploads to GitHub Actions, and waits for the AI report.</sub>
+    </td>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-cached-report.jpg" width="150" alt="Apple Watch cached latest report screen"><br>
+      <strong>Cached report</strong><br>
+      <sub>Keeps the latest successful report until the next successful refresh.</sub>
+    </td>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-notification-preview.jpg" width="150" alt="Apple Watch notification preview screen"><br>
+      <strong>Notification preview</strong><br>
+      <sub>Shows the summary used for the local Watch notification.</sub>
+    </td>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-overall-score.jpg" width="150" alt="Apple Watch overall score screen"><br>
+      <strong>Overall score</strong><br>
+      <sub>Presents the personalized score, assessment, and top recommendation.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-daily-reminder.jpg" width="150" alt="Apple Watch daily reminder section"><br>
+      <strong>Daily reminder</strong><br>
+      <sub>Gives a personal morning reminder based on context and recent data.</sub>
+    </td>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-sleep-section.jpg" width="150" alt="Apple Watch sleep recovery section"><br>
+      <strong>Sleep recovery</strong><br>
+      <sub>Summarizes sleep duration, REM, awake time, and recovery advice.</sub>
+    </td>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-activity-section.jpg" width="150" alt="Apple Watch activity and sitting section"><br>
+      <strong>Activity and sitting</strong><br>
+      <sub>Reviews steps, standing time, stairs, and sedentary-work recovery.</sub>
+    </td>
+    <td width="25%" valign="top" align="center">
+      <img src="docs/images/watch-focus-plan.jpg" width="150" alt="Apple Watch focus plan section"><br>
+      <strong>Focus plan</strong><br>
+      <sub>Turns the report into a practical plan for rest, movement, and focus.</sub>
+    </td>
+  </tr>
+</table>
 
 ## Features
 
